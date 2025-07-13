@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Retail Billing System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            text-align: center;
+        }
+        .invoice {
+            background: #fff;
+            border: 1px solid #ccc;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .totals {
+            text-align: right;
+            margin-top: 15px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Retail Billing System</h2>
+
+<div style="text-align:center;">
+    <input type="text" id="name" placeholder="Product Name">
+    <input type="number" id="price" placeholder="Price (₹)" step="0.01">
+    <input type="number" id="qty" placeholder="Quantity" min="1">
+    <button onclick="addItem()">Add Item</button>
+</div>
+
+<div style="text-align:center; margin-top: 10px;">
+    <input type="number" id="discount" placeholder="Discount (₹)" step="0.01">
+    <button onclick="generateInvoice()">Generate Invoice</button>
+</div>
+
+<div class="invoice" id="invoice" style="display:none;">
+    <h3>SHANAYA'Z / NAVKAR CREATION</h3>
+    <p><strong>Date:</strong> <span id="date"></span></p>
+
+    <table id="invoiceTable">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price (₹)</th>
+                <th>Total (₹)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="totals" id="totals"></div>
+
+    <p style="text-align:center;">Thank you for shopping with us!</p>
+</div>
+
+<script>
+    const TAX_RATE = 0.05;
+    let cart = [];
+
+    function addItem() {
+        const name = document.getElementById("name").value;
+        const price = parseFloat(document.getElementById("price").value);
+        const qty = parseInt(document.getElementById("qty").value);
+
+        if (!name || isNaN(price) || isNaN(qty) || price <= 0 || qty <= 0) {
+            alert("Please enter valid product details.");
+            return;
+        }
+
+        cart.push({ name, price, qty });
+        document.getElementById("name").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("qty").value = "";
+    }
+
+    function generateInvoice() {
+        if (cart.length === 0) {
+            alert("Cart is empty.");
+            return;
+        }
+
+        const discount = parseFloat(document.getElementById("discount").value) || 0;
+        const tbody = document.querySelector("#invoiceTable tbody");
+        tbody.innerHTML = "";
+
+        let subtotal = 0;
+        cart.forEach(item => {
+            const total = item.price * item.qty;
+            subtotal += total;
+
+            const row = `<tr>
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td>₹${item.price.toFixed(2)}</td>
+                <td>₹${total.toFixed(2)}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+
+        const validDiscount = Math.min(discount, subtotal);
+        const tax = (subtotal - validDiscount) * TAX_RATE;
+        const totalDue = (subtotal - validDiscount) + tax;
+
+        const totalsDiv = document.getElementById("totals");
+        totalsDiv.innerHTML = `
+            <p><strong>Subtotal:</strong> ₹${subtotal.toFixed(2)}</p>
+            <p><strong>Discount:</strong> -₹${validDiscount.toFixed(2)}</p>
+            <p><strong>Tax (5%):</strong> ₹${tax.toFixed(2)}</p>
+            <p><strong>Total Due:</strong> ₹${totalDue.toFixed(2)}</p>
+        `;
+
+        document.getElementById("date").innerText = new Date().toLocaleString();
+        document.getElementById("invoice").style.display = "block";
+    }
+</script>
+
+</body>
+</html>
